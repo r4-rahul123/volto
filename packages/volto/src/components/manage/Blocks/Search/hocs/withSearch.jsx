@@ -411,9 +411,17 @@ const withSearch = (options) => (WrappedComponent) => {
               sortOrder: toSortOrder || sortOrder,
               facetSettings,
             });
-            if (toSearchFacets) setFacets(toSearchFacets);
-            if (toSortOn) setSortOn(toSortOn || undefined);
-            if (toSortOrder) setSortOrder(toSortOrder);
+            // Make state updates idempotent to prevent double state updates
+            // when both external setFacets and onTriggerSearch are called
+            if (toSearchFacets && !isEqual(toSearchFacets, facets)) {
+              setFacets(toSearchFacets);
+            }
+            if (toSortOn && toSortOn !== sortOn) {
+              setSortOn(toSortOn);
+            }
+            if (toSortOrder && toSortOrder !== sortOrder) {
+              setSortOrder(toSortOrder);
+            }
             setSearchData(newSearchData);
             setLocationSearchData(getSearchFields(newSearchData));
           },
